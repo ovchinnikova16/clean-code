@@ -15,17 +15,16 @@
 		{
 			var isCheck = IsCheckForWhite();
 			var hasMoves = false;
-			foreach (var locFrom in board.GetPieces(PieceColor.White))
+			foreach (var locFrom in board.GetPiecesLocations(PieceColor.White))
 			{
 				foreach (var locTo in board.GetPiece(locFrom).GetMoves(locFrom, board))
 				{
-					var old = board.GetPiece(locTo);
-					board.Set(locTo, board.GetPiece(locFrom));
-					board.Set(locFrom, null);
-					if (!IsCheckForWhite())
-						hasMoves = true;
-					board.Set(locFrom, board.GetPiece(locTo));
-					board.Set(locTo, old);
+					var currentPiece = board.GetPiece(locTo);
+
+					MakeStep(locTo, locFrom);
+
+				    hasMoves = !IsCheckForWhite();
+                    MakeStep(locFrom, locTo, currentPiece);
 				}
 			}
 			if (isCheck)
@@ -36,21 +35,23 @@
 			else ChessStatus = ChessStatus.Stalemate;
 		}
 
-		// check — это шах
+	    private static void MakeStep(Location locTo, Location locFrom, Piece pieceOnLocFrom = null)
+	    {
+	        board.Set(locTo, board.GetPiece(locFrom));
+	        board.Set(locFrom, pieceOnLocFrom);
+	    }
+
+	    // check — это шах
 		private static bool IsCheckForWhite()
 		{
-			var isCheck = false;
-			foreach (var loc in board.GetPieces(PieceColor.Black))
+			foreach (var loc in board.GetPiecesLocations(PieceColor.Black))
 			{
 				var piece = board.GetPiece(loc);
 				var moves = piece.GetMoves(loc, board);
 				foreach (var destination in moves)
-				{
 					if (board.GetPiece(destination).Is(PieceColor.White, PieceType.King))
-						isCheck = true;
-				}
+						return true;
 			}
-			if (isCheck) return true;
 			return false;
 		}
 	}
