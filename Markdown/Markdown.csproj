@@ -48,7 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Md.cs" />
+    <Compile Include="Md_ShouldRender.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Tag.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
