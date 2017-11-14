@@ -16,7 +16,7 @@ namespace Markdown
 
         public static string ConvertToHtml(string line)
         {
-            var strongTagsPairs = new Stack<Tuple<Tag, Tag>>();
+            var strongTagsPairs = new Stack<TagsPair>();
             var openingTags = new Stack<Tag>();
 
             var pos = 0;
@@ -44,7 +44,7 @@ namespace Markdown
                         openingTag = openingTags.Pop();
 
                     if (IsStrongInEm(closingTag, openingTags))
-                        strongTagsPairs.Push(new Tuple<Tag, Tag>(openingTag, closingTag));
+                        strongTagsPairs.Push(new TagsPair(openingTag, closingTag));
                     else
                     {
                         if (closingTag.Type == TagType.Em)
@@ -61,7 +61,7 @@ namespace Markdown
                         while (strongTagsPairs.Count > 0)
                         {
                             var tagsPair = strongTagsPairs.Pop();
-                            line = ReplaceTag(line, tagsPair.Item1, tagsPair.Item2);
+                            line = ReplaceTag(line, tagsPair.Opening, tagsPair.Closing);
                         }
                     }
                     openingTags.Push(tag);
@@ -72,7 +72,7 @@ namespace Markdown
             while (strongTagsPairs.Count > 0)
             {
                 var tagsPair = strongTagsPairs.Pop();
-                line = ReplaceTag(line, tagsPair.Item1, tagsPair.Item2);
+                line = ReplaceTag(line, tagsPair.Opening, tagsPair.Closing);
             }
             return line;
         }

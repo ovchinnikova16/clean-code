@@ -10,5 +10,11 @@ namespace Markdown
     {
         public Tag Opening { get; set; } 
         public Tag Closing { get; set; }
+
+        public TagsPair(Tag openingTag, Tag closingTag)
+        {
+            Opening = openingTag;
+            Closing = closingTag;
+        }
     }
 }
