@@ -43,7 +43,7 @@ namespace Markdown
                     while (openingTag.Type != tag.Type && openingTags.Any())
                         openingTag = openingTags.Pop();
 
-                    if (IsStrongInEm(closingTag, openingTags))
+                    if (Tag.IsStrongInEm(closingTag, openingTags))
                         strongTagsPairs.Push(new TagsPair(openingTag, closingTag));
                     else
                     {
@@ -76,11 +76,6 @@ namespace Markdown
             }
             return line;
         }
-
-	    private static bool IsStrongInEm(Tag closingTag, Stack<Tag> openingTags)
-	    {
-	        return closingTag.Type == TagType.Strong && openingTags.Any(x => x.Type == TagType.Em);
-	    }
 
 	    public static string ReplaceTag(string line, Tag openingTag, Tag closingTag)
         {

@@ -47,6 +47,11 @@ namespace Markdown
             return (pos + 1 < line.Length && char.IsDigit(line[pos + 1])) ||
                 (pos - 1 >= 0 && char.IsDigit(line[pos - 1]));
         }
+
+        public static bool IsStrongInEm(Tag closingTag, Stack<Tag> openingTags)
+        {
+            return closingTag.Type == TagType.Strong && openingTags.Any(x => x.Type == TagType.Em);
+        }
     }
 
     public enum TagType

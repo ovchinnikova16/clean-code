@@ -34,7 +34,7 @@ namespace Markdown
         [TestCase(@"__abc\_\_d__", ExpectedResult = "<strong>abc__d</strong>")]
         [TestCase(@"__abc____abc__", ExpectedResult = "<strong>abc</strong><strong>abc</strong>")]
 
-        public string ParseStrongTokens(string markdown)
+        public string ParseStrongTags(string markdown)
         {
             return Md.ConvertToHtml(markdown);
         }
