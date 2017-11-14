@@ -43,7 +43,7 @@ namespace Markdown
         [TestCase("_a__b__c_", ExpectedResult = "<em>a__b__c</em>")]
         [TestCase("_ab __cd__ __cd__ ab_", ExpectedResult = "<em>ab __cd__ __cd__ ab</em>")]
         [TestCase("_ab __cd__ ab", ExpectedResult = "_ab <strong>cd</strong> ab")]
-        public string ParseStrongInEmTokens(string markdown)
+        public string ParseStrongInEmTags(string markdown)
         {
             return Md.ConvertToHtml(markdown);
         }
@@ -51,7 +51,7 @@ namespace Markdown
         [TestCase("__abc _def_ abc__", ExpectedResult = "<strong>abc <em>def</em> abc</strong>")]
         [TestCase("__abc_def_abc__", ExpectedResult = "<strong>abc<em>def</em>abc</strong>")]
         [TestCase("___abc_", ExpectedResult = "__<em>abc</em>")]
-        public string ParseEmInStrongokens(string markdown)
+        public string ParseEmInStrongTags(string markdown)
         {
             return Md.ConvertToHtml(markdown);
         }

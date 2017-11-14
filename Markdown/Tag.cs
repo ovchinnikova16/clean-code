@@ -28,19 +28,17 @@ namespace Markdown
             return null;
         }
 
-        public static bool IsRightOpeningTag(string line, Tag tag)
+        public static bool IsValidOpeningTag(string line, Tag tag)
         {
             return tag.Position < line.Length - 1
                 && line[tag.Position + 1] != ' '
                 && !WithDigits(line, tag.Position);
         }
 
-        public static bool IsRightClosingTag(string line, Tag tag, Stack<Tag> stackTag)
+        public static bool IsValidClosingTag(string line, Tag tag, Stack<Tag> stackTag)
         {
             if (tag.Position > 0 && line[tag.Position - 1] != ' ' && !WithDigits(line, tag.Position))
-                foreach (var t in stackTag)
-                    if (t.Type == tag.Type)
-                        return true;
+                return stackTag.Any(t => t.Type == tag.Type);
             return false;
         }
 
@@ -49,11 +47,11 @@ namespace Markdown
             return (pos + 1 < line.Length && char.IsDigit(line[pos + 1])) ||
                 (pos - 1 >= 0 && char.IsDigit(line[pos - 1]));
         }
+    }
 
-        public enum TagType
-        {
-            Strong,
-            Em
-        }
+    public enum TagType
+    {
+        Strong,
+        Em
     }
 }

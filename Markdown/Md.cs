@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using NUnit.Framework;
 using System;
 using System.Linq;
 
@@ -17,64 +16,76 @@ namespace Markdown
 
         public static string ConvertToHtml(string line)
         {
-            var strongTags = new Stack<Tuple<Tag, Tag>>();
-            var stackTag = new Stack<Tag>();
+            var strongTagsPairs = new Stack<Tuple<Tag, Tag>>();
+            var openingTags = new Stack<Tag>();
 
-            for (var i = 0; i < line.Length; i++)
+            var pos = 0;
+            while (pos < line.Length)
             {
-                if (line[i] == '\\')
+                if (line[pos] == '\\')
                 {
-                    line = line.Remove(i, 1);
-                    i++;
+                    line = line.Remove(pos, 1);
+                    pos++;
                 }
-                var tag = Tag.CreateTag(line, i);
+                var tag = Tag.CreateTag(line, pos);
                 if (tag == null)
-                    continue;
-                if (tag.Type == Tag.TagType.Strong)
-                    i++;
-
-                if (Tag.IsRightClosingTag(line, tag, stackTag))
                 {
-                    var openingTag = stackTag.Pop();
-                    while (openingTag.Type != tag.Type && stackTag.Count != 0)
-                        openingTag = stackTag.Pop();
-                    var closingTag = tag;
+                    pos++;
+                    continue;
+                }
+                if (tag.Type == TagType.Strong)
+                    pos++;
 
-                    if (closingTag.Type == Tag.TagType.Strong && stackTag.Any(x => x.Type == Tag.TagType.Em))
-                        strongTags.Push(new Tuple<Tag, Tag>(openingTag, closingTag));
+                if (Tag.IsValidClosingTag(line, tag, openingTags))
+                {
+                    var closingTag = tag;
+                    var openingTag = openingTags.Pop();
+                    while (openingTag.Type != tag.Type && openingTags.Any())
+                        openingTag = openingTags.Pop();
+
+                    if (IsStrongInEm(closingTag, openingTags))
+                        strongTagsPairs.Push(new Tuple<Tag, Tag>(openingTag, closingTag));
                     else
                     {
-                        if (closingTag.Type == Tag.TagType.Em)
-                            strongTags.Clear();
+                        if (closingTag.Type == TagType.Em)
+                            strongTagsPairs.Clear();
                         line = ReplaceTag(line, openingTag, closingTag);
                     }
+    
                 }
 
-                else if (Tag.IsRightOpeningTag(line, tag))
+                else if (Tag.IsValidOpeningTag(line, tag))
                 {
-                    if (tag.Type == Tag.TagType.Em)
+                    if (tag.Type == TagType.Em)
                     {
-                        while (strongTags.Count > 0)
+                        while (strongTagsPairs.Count > 0)
                         {
-                            var tagsPair = strongTags.Pop();
+                            var tagsPair = strongTagsPairs.Pop();
                             line = ReplaceTag(line, tagsPair.Item1, tagsPair.Item2);
                         }
                     }
-                    stackTag.Push(tag);
+                    openingTags.Push(tag);
                 }
+                pos++;
             }
-            while (strongTags.Count > 0)
+
+            while (strongTagsPairs.Count > 0)
             {
-                var tagsPair = strongTags.Pop();
+                var tagsPair = strongTagsPairs.Pop();
                 line = ReplaceTag(line, tagsPair.Item1, tagsPair.Item2);
             }
             return line;
         }
 
-        public static string ReplaceTag(string line, Tag openingTag, Tag closingTag)
+	    private static bool IsStrongInEm(Tag closingTag, Stack<Tag> openingTags)
+	    {
+	        return closingTag.Type == TagType.Strong && openingTags.Any(x => x.Type == TagType.Em);
+	    }
+
+	    public static string ReplaceTag(string line, Tag openingTag, Tag closingTag)
         {
             var length = 1;
-            if (openingTag.Type == Tag.TagType.Strong)
+            if (openingTag.Type == TagType.Strong)
                 length++;
             closingTag.Position += HtmlTags[closingTag.Type].Length - length;
             return line
@@ -84,10 +95,10 @@ namespace Markdown
                 .Insert(closingTag.Position, HtmlTags[openingTag.Type].Insert(1, "/"));
         }
 
-        public static Dictionary<Tag.TagType, string> HtmlTags = new Dictionary<Tag.TagType, string>
+        public static Dictionary<TagType, string> HtmlTags = new Dictionary<TagType, string>
         {
-            {Tag.TagType.Strong, "<strong>"},
-            {Tag.TagType.Em, "<em>" },
+            {TagType.Strong, "<strong>"},
+            {TagType.Em, "<em>" },
 
         };
     }
